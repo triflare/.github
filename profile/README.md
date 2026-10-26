@@ -1,8 +1,6 @@
 <div align="center">
 
-<img src="./logo.svg" width="200" alt="Triflare logo">
-
----
+<img src="./logo.svg" width="225" alt="Triflare logo">
 
 **Building TypeScript tools for developers.**
 
