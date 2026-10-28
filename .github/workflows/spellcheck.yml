@@ -1,0 +1,43 @@
+name: Spellcheck
+
+on:
+  push:
+    branches: ["**"]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: spellcheck-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  markdown:
+    name: Check for Markdown spelling and grammar issues
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install Harper
+        env:
+          HARPER_VERSION: 3.0.0
+        run: |
+          curl -sSfL "https://github.com/Automattic/harper/releases/download/v${HARPER_VERSION}/harper-cli-x86_64-unknown-linux-gnu.tar.gz" | tar xz
+          ./harper-cli --version
+
+      - name: Check for Markdown spelling and grammar issues
+        run: |
+          mapfile -d '' -t files < <(git ls-files -z '*.md')
+          if [[ ${#files[@]} -eq 0 ]]; then
+            echo "No Markdown files to check."
+            exit 0
+          fi
+          echo "Checking ${#files[@]} Markdown file(s)..."
+          ./harper-cli lint \
+            --no-color \
+            --quiet \
+            --format compact \
+            --ignore UseTitleCase \
+            --user-dict-path .github/harper-dictionary.txt \
+            "${files[@]}"
